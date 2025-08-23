@@ -3,6 +3,8 @@ import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import LogoutPage from './pages/LogoutPage';
+import RoomsPage from './pages/RoomsPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -12,6 +14,9 @@ function App() {
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/logout' element={<LogoutPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/rooms" element={<RoomsPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
