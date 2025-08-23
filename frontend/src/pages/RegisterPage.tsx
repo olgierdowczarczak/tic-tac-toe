@@ -1,0 +1,33 @@
+import { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+function RegisterPage() {
+    const navigate = useNavigate();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const handleSubmit = async e => {
+        e.preventDefault();
+        axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/users/register`, { username, password })
+            .then(res => {
+                localStorage.setItem('token', res.data);
+                navigate('/');
+            })
+            .catch(err => err);
+    }
+
+    return (
+        <>
+            <h1>Register page</h1>
+            <form onSubmit={handleSubmit}>
+                <input type='text' value={username} onChange={e => setUsername(e.target.value)} placeholder='username' required />
+                <br />
+                <input type='password' value={password} onChange={e => setPassword(e.target.value)} placeholder='password' required />
+                <br />
+                <button type='submit'>Register</button>
+            </form>
+        </>
+    );
+}
+
+export default RegisterPage;
