@@ -8,7 +8,7 @@ export async function register(req, res) {
         await user.save();
 
         const token = jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.send(token);
+        res.json({ token });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -17,9 +17,10 @@ export async function register(req, res) {
 export async function login(req, res) {
     try {
         const user = await User.findOne({ username: req.body.username });
-        if (!user || !(await user.checkPassword(req.body.password))) return res.status(401).json({ error: "Invalid credentials" })
-        
-        res.send(jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }));
+        if (!user || !(await user.checkPassword(req.body.password))) return res.status(401).json({ error: 'Invalid credentials' })
+
+        const token = jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
