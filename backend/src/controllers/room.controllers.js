@@ -23,6 +23,7 @@ export async function createRoom(req, res) {
         }
 
         await room.save();
+        req.io.emit('refresh-rooms');
         return res.json(await getPublicRoom(room));
     } catch (err) {
         console.error(err);
@@ -64,6 +65,7 @@ export async function joinRoom(req, res) {
         const username = req.user.username;
         room.players.push({ _id: userId, username });
         await room.save();
+        req.io.emit('refresh-rooms');
         return res.json(await getPublicRoom(room));
     } catch (err) {
         console.error(err);
@@ -83,12 +85,12 @@ export async function leaveRoom(req, res) {
         }
 
         if (userId === String(room.owner)) {
-            room.isActive = false;
-        } else {
-            room.players = room.players.filter(player => String(player._id) !== userId);
+            return res.status(403).json({ message: 'Owner can not leave room' });
         }
-
+        
+        room.players.pop();
         await room.save();
+        req.io.emit('refresh-rooms');
         return res.json();
     } catch (err) {
         console.error(err);
@@ -109,7 +111,8 @@ export async function deleteRoom(req, res) {
         room.isActive = false;
         room.state = 0;
         await room.save();
-        
+
+        req.io.emit('refresh-rooms');
         return res.json();
     } catch (err) {
         console.error(err);
