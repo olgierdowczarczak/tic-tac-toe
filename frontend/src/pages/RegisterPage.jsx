@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import { register } from "../api/auth";
 
 function RegisterPage() {
     const navigate = useNavigate();
@@ -17,13 +17,10 @@ function RegisterPage() {
         setError(null);
 
         try {
-            const res = await api.post("/api/users/register", formData);
-            localStorage.setItem("token", res.data.token);
+            await register(formData);
             navigate("/");
         } catch (err) {
-            const message =
-                err.response?.data?.error || err.message || "Registration failed";
-            setError(message);
+            setError(err.response?.data?.message || err.error || "Registration failed");
         }
     };
 

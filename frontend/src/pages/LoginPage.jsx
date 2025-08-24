@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import { login } from "../api/auth";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -17,13 +17,10 @@ function LoginPage() {
         setError(null);
 
         try {
-            const res = await api.post("/api/users/login", formData);
-            localStorage.setItem("token", res.data.token);
+            await login(formData);
             navigate("/");
         } catch (err) {
-            const message =
-                err.response?.data?.error || err.message || "Login failed";
-            setError(message);
+            setError(err.response?.data?.message || err.error || "Login failed");
         }
     };
 

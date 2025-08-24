@@ -1,5 +1,5 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { decodeToken } from 'react-jwt';
+import { Navigate, Outlet } from "react-router-dom";
+import { decodeToken } from "react-jwt";
 
 const isTokenValid = token => {
     if (!token) return false;
@@ -13,6 +13,6 @@ const isTokenValid = token => {
 };
 
 export default function PrivateRoute() {
-    const token = localStorage.getItem('token');
-    return isTokenValid(token) ? <Outlet /> : <Navigate to='/login' />;
+    const token = localStorage.getItem("token");
+    return isTokenValid(token) ? <Outlet /> : <Navigate to="/login" />;
 }

@@ -1,56 +1,95 @@
 import { useEffect, useState } from "react";
-import api from "../api";
+import { fetchActiveRooms, createRoom, joinRoom, deleteRoom, leaveRoom } from "../api/rooms";
 
 function RoomsPage() {
     const [rooms, setRooms] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const USER_ID = localStorage.getItem("id");
 
-    useEffect(() => {
-        fetchRooms();
-    }, []);
+    const handleRequest = async (callback) => {
+        setError(null);
+        setLoading(true);
+        try {
+            await callback();
+            await fetchRooms();
+        } catch (err) {
+            setError(err.response?.data?.message || err.error || "Unexpected error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchRooms = async () => {
         setError(null);
         setLoading(true);
         try {
-            const res = await api.get("/api/rooms/active-rooms");
+            const res = await fetchActiveRooms();
             setRooms(res.data);
         } catch (err) {
-            setError(err.response?.data?.error || err.message);
+            setError(err.response?.data?.message || err.error || "Failed to fetch rooms");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleAddRoom = async () => {
-        setError(null);
-        setLoading(true);
-        try {
-            await api.post("/api/rooms/create");
-            await fetchRooms();
-        } catch (err) {
-            setError(err.response?.data?.error || err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+        fetchRooms();
+    }, []);
 
     return (
         <>
             <h1>Rooms page</h1>
 
             {error && <div style={{ color: "red" }}>{error}</div>}
-
             {loading && <p>Loading...</p>}
 
-            <ul>
-                {rooms.map((room) => (
-                    <li key={room._id}>{room._id}</li>
-                ))}
-            </ul>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Owner</th>
+                        <th>Players</th>
+                        <th colSpan="2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rooms.map((room) => {
+                        const isOwner = USER_ID === room.owner;
+                        const isPlayer = room.players.some((p) => p._id === USER_ID);
+                        const isFull = room.players.length === 2;
+                        const isStarted = room.state;
 
-            <button onClick={handleAddRoom} disabled={loading}>
+                        return (
+                            <tr key={room._id}>
+                                <td>{room.players[0]?.username || "Unknown"}</td>
+                                <td>{room.players.length} / 2</td>
+                                <td>
+                                    <button
+                                        onClick={() => handleRequest(() => joinRoom(room._id, ""))}
+                                        disabled={isFull || isStarted || isPlayer}
+                                    >
+                                        Join
+                                    </button>
+                                </td>
+                                <td>
+                                    {isOwner && !isStarted && (
+                                        <button onClick={() => handleRequest(() => deleteRoom(room._id))}>
+                                            Delete
+                                        </button>
+                                    )}
+                                    {!isOwner && isPlayer && (
+                                        <button onClick={() => handleRequest(() => leaveRoom(room._id))}>
+                                            Leave
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+
+            <button onClick={() => handleRequest(createRoom)} disabled={loading}>
                 {loading ? "Processing..." : "Add"}
             </button>
         </>

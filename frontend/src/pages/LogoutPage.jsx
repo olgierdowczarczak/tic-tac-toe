@@ -12,6 +12,7 @@ function LogoutPage() {
                 console.error("Logout error:", err);
             } finally {
                 localStorage.removeItem("token");
+                localStorage.removeItem("id");
                 navigate("/login");
             }
         };
