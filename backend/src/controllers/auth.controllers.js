@@ -20,7 +20,6 @@ export async function register(req, res) {
         const token = generateToken(user._id);
         res.json({ _id: user._id, token });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 }
@@ -45,7 +44,6 @@ export async function login(req, res) {
         const token = generateToken(user._id);
         res.json({ _id: user._id, token });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 }
