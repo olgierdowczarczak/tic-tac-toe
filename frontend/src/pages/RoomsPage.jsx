@@ -1,44 +1,14 @@
-import { useEffect, useState } from "react";
-import { fetchActiveRooms, createRoom, joinRoom, deleteRoom, leaveRoom } from "../api/rooms";
+import { useRooms } from "../hooks/useRooms";
+import { useRoomActions } from "../hooks/useRoomActions";
+import RoomActions from "../components/RoomActions";
 
 function RoomsPage() {
-    const [rooms, setRooms] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const USER_ID = localStorage.getItem("id");
-
-    const handleRequest = async (callback) => {
-        setError(null);
-        setLoading(true);
-        try {
-            await callback();
-            await fetchRooms();
-        } catch (err) {
-            setError(err.response?.data?.message || err.error || "Unexpected error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchRooms = async () => {
-        setError(null);
-        setLoading(true);
-        try {
-            const res = await fetchActiveRooms();
-            setRooms(res.data);
-        } catch (err) {
-            setError(err.response?.data?.message || err.error || "Failed to fetch rooms");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchRooms();
-    }, []);
+    const userId = localStorage.getItem("id");
+    const { rooms, loading, error, setError } = useRooms();
+    const actions = useRoomActions(setError);
 
     return (
-        <>
+        <div>
             <h1>Rooms page</h1>
 
             {error && <div style={{ color: "red" }}>{error}</div>}
@@ -49,50 +19,29 @@ function RoomsPage() {
                     <tr>
                         <th>Owner</th>
                         <th>Players</th>
-                        <th colSpan="2">Actions</th>
+                        <th colSpan="3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {rooms.map((room) => {
-                        const isOwner = USER_ID === room.owner;
-                        const isPlayer = room.players.some((p) => p._id === USER_ID);
-                        const isFull = room.players.length === 2;
-                        const isStarted = room.state;
-
-                        return (
-                            <tr key={room._id}>
-                                <td>{room.players[0]?.username || "Unknown"}</td>
-                                <td>{room.players.length} / 2</td>
-                                <td>
-                                    <button
-                                        onClick={() => handleRequest(() => joinRoom(room._id, ""))}
-                                        disabled={isFull || isStarted || isPlayer}
-                                    >
-                                        Join
-                                    </button>
-                                </td>
-                                <td>
-                                    {isOwner && !isStarted && (
-                                        <button onClick={() => handleRequest(() => deleteRoom(room._id))}>
-                                            Delete
-                                        </button>
-                                    )}
-                                    {!isOwner && isPlayer && (
-                                        <button onClick={() => handleRequest(() => leaveRoom(room._id))}>
-                                            Leave
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        );
-                    })}
+                    {rooms.map((room) => (
+                        <tr key={room._id}>
+                            <td>{room.players[0]?.username || "Unknown"}</td>
+                            <td>{room.players.length} / 2</td>
+                            <RoomActions
+                                room={room}
+                                userId={userId}
+                                loading={loading}
+                                actions={actions}
+                            />
+                        </tr>
+                    ))}
                 </tbody>
             </table>
 
-            <button onClick={() => handleRequest(createRoom)} disabled={loading}>
+            <button onClick={actions.createRoom} disabled={loading}>
                 {loading ? "Processing..." : "Add"}
             </button>
-        </>
+        </div>
     );
 }
 
