@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function HomePage() {
+export default function () {
     const links = [
         { to: "/login", label: "Login" },
         { to: "/register", label: "Register" },
@@ -20,5 +20,3 @@ function HomePage() {
         </nav>
     );
 }
-
-export default HomePage;

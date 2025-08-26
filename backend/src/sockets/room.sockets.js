@@ -17,7 +17,8 @@ export default function handleRoomSockets(io, socket) {
 
     socket.on('room:create', withErrorHandler(async (callback) => {
         const userId = getUserIdAsString();
-        if (await findUserInRooms(userId)) throw new Error('Already in room');
+        const dbRoom = await findUserInRooms(userId);
+        if (dbRoom) throw new Error('Already in room');
 
         const room = new Room({
             owner: userId,
@@ -37,7 +38,8 @@ export default function handleRoomSockets(io, socket) {
         if (!room.isActive) throw new Error('Room is not active');
         if (room.players.length === 2) throw new Error('Room is full');
 
-        if (await findUserInRooms(getUserIdAsString())) throw new Error('Already in room');
+        const dbRoom = await findUserInRooms(getUserIdAsString()); 
+        if (dbRoom) throw new Error('Already in room');
 
         room.players.push(socket.user);
         await room.save();
