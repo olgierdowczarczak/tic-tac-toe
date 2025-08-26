@@ -1,28 +1,17 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import socket from "../lib/socket";
-import { useRooms } from "../hooks/useRooms";
-import { useRoomActions } from "../hooks/useRoomActions";
+import useRooms from "../hooks/useRooms";
+import useRoomActions from "../hooks/useRoomActions";
 import RoomActions from "../components/RoomActions";
+import useGameStartListener from "../hooks/useGameStartListener";
 
-function RoomsPage() {
+export default function () {
     const userId = localStorage.getItem("id");
     const { rooms, loading, error, setError } = useRooms();
     const actions = useRoomActions(setError);
-    const navigate = useNavigate();
-    const handleStartGame = async(roomId) => {
-        navigate(`/rooms/${roomId}`);
-    };
-
-    useEffect(() => {
-        socket.on("game:start", handleStartGame);
-        return () => socket.off("game:start", handleStartGame);
-    }, [socket]);
+    useGameStartListener();
 
     return (
         <div>
-            <h1>Rooms page</h1>
-
+            <h1>Rooms</h1>
             {error && <div style={{ color: "red" }}>{error}</div>}
             {loading && <p>Loading...</p>}
 
@@ -51,10 +40,8 @@ function RoomsPage() {
             </table>
 
             <button onClick={actions.createRoom} disabled={loading}>
-                {loading ? "Processing..." : "Add"}
+                {loading ? "Processing..." : "Create Room"}
             </button>
         </div>
     );
 }
-
-export default RoomsPage;

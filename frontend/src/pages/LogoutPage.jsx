@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function LogoutPage() {
+export default function () {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -11,8 +11,7 @@ function LogoutPage() {
             } catch (err) {
                 console.error("Logout error:", err);
             } finally {
-                localStorage.removeItem("token");
-                localStorage.removeItem("id");
+                localStorage.clear();
                 navigate("/login");
             }
         };
@@ -22,5 +21,3 @@ function LogoutPage() {
 
     return null;
 }
-
-export default LogoutPage;

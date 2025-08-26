@@ -10,11 +10,8 @@ export default function handleRoomSockets(io, socket) {
         try {
             await handler(...args);
         } catch (err) {
-            if (typeof callback === "function") {
-                callback(err.message);
-            } else {
-                console.error(err.message);
-            }
+            if (typeof callback === "function") callback(err.message);
+            else console.error(err.message);
         }
     };
 
@@ -40,8 +37,7 @@ export default function handleRoomSockets(io, socket) {
         if (!room.isActive) throw new Error('Room is not active');
         if (room.players.length === 2) throw new Error('Room is full');
 
-        const userId = getUserIdAsString();
-        if (await findUserInRooms(userId)) throw new Error('Already in room');
+        if (await findUserInRooms(getUserIdAsString())) throw new Error('Already in room');
 
         room.players.push(socket.user);
         await room.save();
@@ -76,8 +72,7 @@ export default function handleRoomSockets(io, socket) {
         if (!room.isActive) throw new Error('Room is not active');
         if (room.state) throw new Error('Can not delete this room');
 
-        const userId = getUserIdAsString();
-        if (userId !== String(room.owner)) throw new Error('Not an owner');
+        if (getUserIdAsString() !== String(room.owner)) throw new Error('Not an owner');
 
         room.isActive = false;
         room.state = 0;
@@ -85,9 +80,7 @@ export default function handleRoomSockets(io, socket) {
 
         const roomIndex = String(room._id);
         const clients = await io.in(roomIndex).fetchSockets();
-        clients.forEach(client => {
-            client.leave(roomIndex);
-        });
+        clients.forEach(client => client.leave(roomIndex));
 
         io.emit('room:refresh');
         callback?.(null, true);

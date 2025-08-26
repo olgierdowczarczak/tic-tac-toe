@@ -9,18 +9,17 @@ function ProtectedRoute() {
     const currentGame = localStorage.getItem("currentGame");
 
     const verifyRoom = useCallback(async () => {
-        handlePlayerRoom(currentGame, null, (path) => setRedirectPath(path));
+        handlePlayerRoom(currentGame, "/rooms", (path) => setRedirectPath(path));
     }, [currentGame]);
 
     useEffect(() => {
         if (!isTokenValid(token)) return setRedirectPath("/logout");
-        if (!currentGame) return setRedirectPath(null);
 
         verifyRoom();
     }, [token, currentGame, verifyRoom]);
 
     if (redirectPath) return <Navigate to={redirectPath} replace />;
-
+    
     return <Outlet />;
 }
 

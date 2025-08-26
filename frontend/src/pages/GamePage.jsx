@@ -1,12 +1,6 @@
-import { useParams } from 'react-router-dom';
-
-function GamePage() {
-    const { gameId } = useParams();
-    
+export default function () {
     return (
         <>
         </>
     );
-}
-
-export default GamePage;
+};
