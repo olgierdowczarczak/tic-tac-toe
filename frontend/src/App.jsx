@@ -4,6 +4,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import LogoutPage from "./pages/LogoutPage";
 import RoomsPage from "./pages/RoomsPage";
+import GamePage from "./pages/GamePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -16,6 +17,9 @@ function App() {
         <Route path="/logout" element={<LogoutPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/rooms" element={<RoomsPage />} />
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/rooms/:gameId" element={<GamePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

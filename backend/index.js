@@ -8,7 +8,7 @@ import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import authenticateRestToken from './src/middleware/auth-rest.middleware.js';
 import authenticateSocketToken from './src/middleware/auth-socket.middleware.js';
-import roomSockets from './src/sockets/room.sockets.js';
+import handleRoomSockets from './src/sockets/room.sockets.js';
 import userRoutes from './src/routes/user.routes.js';
 import roomRoutes from './src/routes/room.routes.js';
 
@@ -26,7 +26,7 @@ mongoose.connect(process.env.MONGO_URI)
         const io = new Server(server, { cors: { origin: process.env.ALLOWED_HOST || 'http://localhost:5173' } });
         io.use(authenticateSocketToken);
         io.on('connection', (socket) => {
-            roomSockets(io, socket);
+            handleRoomSockets(io, socket);
         });
 
         server.listen(PORT, () => console.log('Server is running on port:', PORT));

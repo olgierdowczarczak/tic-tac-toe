@@ -1,5 +1,5 @@
 function RoomActions({ room, userId, loading, actions }) {
-    const { joinRoom, leaveRoom, deleteRoom } = actions;
+    const { joinRoom, leaveRoom, deleteRoom, startRoom } = actions;
     const isOwner = userId === room.owner;
     const isPlayer = room.players.some((p) => p._id === userId);
     const isFull = room.players.length === 2;
@@ -21,6 +21,9 @@ function RoomActions({ room, userId, loading, actions }) {
                 )}
                 {!isOwner && isPlayer && (
                     <button onClick={() => leaveRoom(room._id)}>Leave</button>
+                )}
+                {isOwner && isFull && !isStarted && (
+                    <button onClick={() => startRoom(room._id)}>Start</button>
                 )}
             </td>
         </>

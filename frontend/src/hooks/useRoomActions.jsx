@@ -17,5 +17,9 @@ export function useRoomActions(setError) {
         socket.emit("room:create", (res) => res && setError(res));
     };
 
-    return { joinRoom, leaveRoom, deleteRoom, createRoom };
+    const startRoom = (roomId) => {
+        socket.emit("room:start", { roomId }, (res) => res && setError(res));
+    };
+
+    return { joinRoom, leaveRoom, deleteRoom, createRoom, startRoom };
 }

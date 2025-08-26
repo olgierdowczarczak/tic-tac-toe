@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import socket from "../lib/socket";
 import { useRooms } from "../hooks/useRooms";
 import { useRoomActions } from "../hooks/useRoomActions";
 import RoomActions from "../components/RoomActions";
@@ -6,6 +9,15 @@ function RoomsPage() {
     const userId = localStorage.getItem("id");
     const { rooms, loading, error, setError } = useRooms();
     const actions = useRoomActions(setError);
+    const navigate = useNavigate();
+    const handleStartGame = async(roomId) => {
+        navigate(`/rooms/${roomId}`);
+    };
+
+    useEffect(() => {
+        socket.on("game:start", handleStartGame);
+        return () => socket.off("game:start", handleStartGame);
+    }, [socket]);
 
     return (
         <div>
