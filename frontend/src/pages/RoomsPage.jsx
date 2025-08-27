@@ -12,7 +12,9 @@ export default function () {
     return (
         <div>
             <h1>Rooms</h1>
+
             {error && <div style={{ color: "red" }}>{error}</div>}
+            
             {loading && <p>Loading...</p>}
 
             <table>

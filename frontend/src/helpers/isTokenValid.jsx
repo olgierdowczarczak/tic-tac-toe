@@ -7,7 +7,8 @@ export default function (token) {
         const decoded = decodeToken(token);
         if (!decoded || !decoded.exp) return false;
 
-        return decoded.exp * 1000 > Date.now();
+        const exp = decoded.exp * 1000;
+        return exp > Date.now();
     } catch {
         return false;
     }

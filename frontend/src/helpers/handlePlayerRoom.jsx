@@ -2,8 +2,7 @@ import { checkPlayerRoom } from "../api/rooms";
 
 export default async function (currentGame, redirect, cb) {
     try {
-        const res = await checkPlayerRoom(currentGame);
-        const room = res.data;
+        const room = await checkPlayerRoom(currentGame);
         if (!room || room._id !== currentGame) {
             localStorage.removeItem("currentGame");
             return cb(redirect);

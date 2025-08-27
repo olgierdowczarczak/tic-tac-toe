@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import removePlayer from "../helpers/removePlayer";
 
 export default function () {
     const navigate = useNavigate();
@@ -7,11 +8,10 @@ export default function () {
     useEffect(() => {
         const logout = async () => {
             try {
-                // TODO send info to server
+                removePlayer();
             } catch (err) {
-                console.error("Logout error:", err);
+                console.error(err);
             } finally {
-                localStorage.clear();
                 navigate("/login");
             }
         };
