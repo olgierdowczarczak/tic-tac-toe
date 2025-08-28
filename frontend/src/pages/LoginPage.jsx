@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
+import connectPlayer from "../helpers/connectPlayer";
 
 export default function () {
     const navigate = useNavigate();
@@ -19,7 +20,8 @@ export default function () {
         setLoading(true);
 
         try {
-            await login(formData);
+            const data = await login(formData);
+            connectPlayer(data);
             navigate("/");
         } catch (err) {
             setError(err.response?.data?.error || err.error || "Login failed");

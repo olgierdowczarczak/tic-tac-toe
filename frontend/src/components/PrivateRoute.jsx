@@ -1,25 +1,28 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import isTokenValid from "../helpers/isTokenValid";
 import handlePlayerRoom from "../helpers/handlePlayerRoom";
 
 function ProtectedRoute() {
     const [redirectPath, setRedirectPath] = useState(null);
-    const token = localStorage.getItem("token");
-    const currentGame = localStorage.getItem("currentGame");
-
-    const verifyRoom = useCallback(async () => {
-        handlePlayerRoom(currentGame, "/rooms", (path) => setRedirectPath(path));
-    }, [currentGame]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isTokenValid(token)) return setRedirectPath("/logout");
+        const checkAccess = async () => {
+            const token = localStorage.getItem("token");
+            const currentGame = localStorage.getItem("currentGame");
+            if (!token || !isTokenValid(token)) setRedirectPath("/logout");
+            else if (currentGame) await handlePlayerRoom(currentGame, "/rooms", (path) => setRedirectPath(path));
 
-        verifyRoom();
-    }, [token, currentGame, verifyRoom]);
+            setLoading(false);
+        };
 
+        checkAccess();
+    }, []);
+
+    if (loading) return;
     if (redirectPath) return <Navigate to={redirectPath} replace />;
-    
+
     return <Outlet />;
 }
 

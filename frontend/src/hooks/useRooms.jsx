@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { fetchActiveRooms } from "../api/rooms";
-import socket from "../lib/socket";
+import { getSocket } from "../lib/socket";
 
 export default function () {
     const [rooms, setRooms] = useState([]);
@@ -12,8 +12,8 @@ export default function () {
         setError(null);
 
         try {
-            const res = await fetchActiveRooms();
-            setRooms(res.data || []);
+            const data = await fetchActiveRooms();
+            setRooms(data || []);
         } catch (err) {
             setError(err.response?.data?.error || err.error || "Failed to fetch rooms");
         } finally {
@@ -23,8 +23,8 @@ export default function () {
 
     useEffect(() => {
         fetchRooms();
-        socket.on("room:refresh", fetchRooms);
-        return () => socket.off("room:refresh", fetchRooms);
+        getSocket().on("room:refresh", fetchRooms);
+        return () => getSocket().off("room:refresh", fetchRooms);
     }, [fetchRooms]);
 
     return { rooms, loading, error, setError, fetchRooms };

@@ -1,6 +1,7 @@
-import socket from "../lib/socket";
+import { getSocket } from "../lib/socket";
 
 export default function (setError) {
+    const socket = getSocket();
     const emitWithError = (event, payload = {}) => {
         socket.emit(event, payload, (res) => {
             if (res) setError(res);

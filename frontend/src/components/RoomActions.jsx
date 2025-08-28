@@ -22,6 +22,7 @@ function RoomActions({ room, userId, loading, actions }) {
 
     const renderPlayerActions = () => {
         if (isOwner) return null;
+        if (isStarted) return null;
         if (isPlayer) return <button onClick={handleLeave}>Leave</button>;
     };
 
