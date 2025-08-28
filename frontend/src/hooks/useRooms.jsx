@@ -12,8 +12,8 @@ export default function () {
         setError(null);
 
         try {
-            const res = await fetchActiveRooms();
-            setRooms(res.data || []);
+            const data = await fetchActiveRooms();
+            setRooms(data || []);
         } catch (err) {
             setError(err.response?.data?.error || err.error || "Failed to fetch rooms");
         } finally {

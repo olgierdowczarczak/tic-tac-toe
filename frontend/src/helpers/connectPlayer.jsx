@@ -1,5 +1,5 @@
 import { updateApi } from "../lib/api";
-import { initSocket } from "../lib/socket";
+import { setSocketToken } from "../lib/socket";
 
 export default function (data) {
     const { token } = data;
@@ -7,5 +7,5 @@ export default function (data) {
     localStorage.setItem("token", token);
     localStorage.setItem("currentGame", data.currentGame);
     updateApi(token);
-    initSocket(token);
+    setSocketToken(token);
 }
