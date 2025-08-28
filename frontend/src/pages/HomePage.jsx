@@ -1,15 +1,22 @@
 import { Link } from "react-router-dom";
 
-function HomePage() {
+export default function () {
+    const links = [
+        { to: "/login", label: "Login" },
+        { to: "/register", label: "Register" },
+        { to: "/rooms", label: "Rooms" },
+        { to: "/logout", label: "Logout" },
+    ];
+
     return (
-        <>
-            <Link to="/login">Login</Link>
-            <br />
-            <Link to="/register">Register</Link>
-            <br />
-            <Link to="/rooms">Rooms</Link>
-        </>
+        <nav>
+            <ul>
+                {links.map(({ to, label }) => (
+                    <li key={to}>
+                        <Link to={to}>{label}</Link>
+                    </li>
+                ))}
+            </ul>
+        </nav>
     );
 }
-
-export default HomePage;

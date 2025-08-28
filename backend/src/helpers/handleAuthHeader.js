@@ -1,7 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
 import User from '../models/user.models.js';
 
-export default async function handleAuthHeader(data) {
+export default async function (data) {
     const authHeader = data;
     if (!authHeader) throw new Error('Authorization header missing or invalid');
 

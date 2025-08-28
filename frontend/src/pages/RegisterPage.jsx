@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
+import connectPlayer from "../helpers/connectPlayer";
 
-function RegisterPage() {
+export default function () {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ username: "", password: "" });
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -15,45 +17,48 @@ function RegisterPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setLoading(true);
 
         try {
-            await register(formData);
+            const data = await register(formData);
+            connectPlayer(data);
             navigate("/");
         } catch (err) {
-            setError(err.response?.data?.message || err.error || "Registration failed");
+            setError(err.response?.data?.error || err.error || "Registration failed");
+        } finally {
+            setLoading(false);
         }
     };
 
+    const inputs = [
+        { type: "text", name: "username", placeholder: "Username" },
+        { type: "password", name: "password", placeholder: "Password" },
+    ];
+
     return (
-        <>
-            <h1>Register page</h1>
+        <div>
+            <h1>Register</h1>
+
             {error && <div style={{ color: "red" }}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="username"
-                    required
-                />
-                <br />
+                {inputs.map(({ type, name, placeholder }) => (
+                    <div key={name}>
+                        <input
+                            type={type}
+                            name={name}
+                            value={formData[name]}
+                            onChange={handleChange}
+                            placeholder={placeholder}
+                            required
+                        />
+                    </div>
+                ))}
 
-                <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="password"
-                    required
-                />
-                <br />
-
-                <button type="submit">Register</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Registering..." : "Register"}
+                </button>
             </form>
-        </>
+        </div>
     );
 }
-
-export default RegisterPage;

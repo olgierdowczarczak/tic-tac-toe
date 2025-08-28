@@ -1,15 +1,15 @@
-import api from '../lib/api';
-
-export const login = async (credentials) => {
-    const res = await api.post('/api/users/login', credentials);
-    localStorage.setItem('id', res.data._id);
-    localStorage.setItem('token', res.data.token);
-    return res;
-};
+import { getApi } from "../lib/api";
 
 export const register = async (credentials) => {
-    const res = await api.post('/api/users/register', credentials);
-    localStorage.setItem('id', res.data._id);
-    localStorage.setItem('token', res.data.token);
-    return res;
+    const res = await getApi().post("/api/users/register", credentials);
+    return res.data;
+};
+
+export const login = async (credentials) => {
+    const res = await getApi().post("/api/users/login", credentials);
+    return res.data;
+};
+
+export const logout = async () => {
+    await getApi().post("/api/users/logout");
 };

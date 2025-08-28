@@ -1,5 +1,10 @@
-import api from '../lib/api';
+import { getApi } from "../lib/api";
 
 export const fetchActiveRooms = async () => {
-    return await api.get('/api/rooms/active-rooms');
+    const res = await getApi().get("/api/rooms/active-rooms");
+    return res.data;
+};
+export const checkPlayerRoom = async (roomId) => {
+    const res = await getApi().get("/api/rooms/player-room", roomId);
+    return res.data;
 };

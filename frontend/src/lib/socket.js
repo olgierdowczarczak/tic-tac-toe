@@ -1,6 +1,29 @@
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const token = localStorage.getItem("token");
-const socket = io(import.meta.env.VITE_API_SERVER_URL, { auth: { token: `Bearer ${token}` } });
+let socket = null;
 
-export default socket;
+export const setSocketToken = (token) => {
+    if (socket) {
+        socket.auth = { token: `Bearer ${token}` };
+        socket.connect();
+    }
+}
+
+export const getSocket = () => {
+    if (!socket) {
+        socket = io(import.meta.env.VITE_API_SERVER_URL, { autoConnect: false });
+
+        const token = localStorage.getItem("token");
+        if (token) socket.auth = { token: `Bearer ${token}` };
+
+        socket.connect();
+    }
+    return socket;
+};
+
+export const removeSocket = () => {
+    if (!socket) return;
+
+    socket.disconnect();
+    socket = null;
+};

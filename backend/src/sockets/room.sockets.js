@@ -3,24 +3,22 @@ import findUserInRooms from '../helpers/findUserInRooms.js';
 import isPlayerInRoom from '../helpers/isPlayerInRoom.js';
 import findRoomById from '../helpers/findRoomById.js';
 
-export default function roomSockets(io, socket) {
+export default function handleRoomSockets(io, socket) {
     const getUserIdAsString = () => String(socket.user._id);
     const withErrorHandler = (handler) => async (...args) => {
         const callback = args[args.length - 1];
         try {
             await handler(...args);
         } catch (err) {
-            if (typeof callback === "function") {
-                callback(err.message);
-            } else {
-                console.error(err.message);
-            }
+            if (typeof callback === "function") callback(err.message);
+            else console.error(err.message);
         }
     };
 
     socket.on('room:create', withErrorHandler(async (callback) => {
         const userId = getUserIdAsString();
-        if (await findUserInRooms(userId)) throw new Error('Already in room');
+        const dbRoom = await findUserInRooms(userId);
+        if (dbRoom) throw new Error('Already in room');
 
         const room = new Room({
             owner: userId,
@@ -28,8 +26,10 @@ export default function roomSockets(io, socket) {
         });
         await room.save();
 
+        const roomIndex = String(room._id);
+        socket.join(roomIndex);
         io.emit('room:refresh');
-        callback?.(null, room);
+        callback?.(null, true);
     }));
 
     socket.on('room:join', withErrorHandler(async ({ roomId }, callback) => {
@@ -38,14 +38,16 @@ export default function roomSockets(io, socket) {
         if (!room.isActive) throw new Error('Room is not active');
         if (room.players.length === 2) throw new Error('Room is full');
 
-        const userId = getUserIdAsString();
-        if (await findUserInRooms(userId)) throw new Error('Already in room');
+        const dbRoom = await findUserInRooms(getUserIdAsString()); 
+        if (dbRoom) throw new Error('Already in room');
 
         room.players.push(socket.user);
         await room.save();
 
+        const roomIndex = String(room._id);
+        socket.join(roomIndex);
         io.emit('room:refresh');
-        callback?.(null, room);
+        callback?.(null, true);
     }));
 
     socket.on('room:leave', withErrorHandler(async ({ roomId }, callback) => {
@@ -60,8 +62,10 @@ export default function roomSockets(io, socket) {
         room.players = room.players.filter(p => String(p._id) !== userId);
         await room.save();
 
+        const roomIndex = String(room._id);
+        socket.leave(roomIndex);
         io.emit('room:refresh');
-        callback?.(null, room);
+        callback?.(null, true);
     }));
 
     socket.on('room:delete', withErrorHandler(async ({ roomId }, callback) => {
@@ -70,14 +74,34 @@ export default function roomSockets(io, socket) {
         if (!room.isActive) throw new Error('Room is not active');
         if (room.state) throw new Error('Can not delete this room');
 
-        const userId = getUserIdAsString();
-        if (userId !== String(room.owner)) throw new Error('Not an owner');
+        if (getUserIdAsString() !== String(room.owner)) throw new Error('Not an owner');
 
         room.isActive = false;
         room.state = 0;
         await room.save();
 
+        const roomIndex = String(room._id);
+        const clients = await io.in(roomIndex).fetchSockets();
+        clients.forEach(client => client.leave(roomIndex));
+
         io.emit('room:refresh');
-        callback?.(null, room);
+        callback?.(null, true);
+    }));
+
+    socket.on('room:start', withErrorHandler(async ({ roomId }, callback) => {
+        const room = await findRoomById(roomId);
+        if (!room) throw new Error('Room does not exist');
+        if (!room.isActive) throw new Error('Room is not active');
+        if (room.state) throw new Error('Can not delete this room');
+
+        const userId = getUserIdAsString();
+        if (userId !== String(room.owner)) throw new Error('Not an owner');
+
+        room.state = 1;
+        await room.save();
+
+        const roomIndex = String(room._id);
+        io.to(roomIndex).emit('game:start', roomIndex);
+        callback?.(null, true);
     }));
 };

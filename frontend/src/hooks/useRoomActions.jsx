@@ -1,21 +1,18 @@
-import socket from "../lib/socket";
+import { getSocket } from "../lib/socket";
 
-export function useRoomActions(setError) {
-    const joinRoom = (roomId) => {
-        socket.emit("room:join", { roomId }, (res) => res && setError(res));
+export default function (setError) {
+    const socket = getSocket();
+    const emitWithError = (event, payload = {}) => {
+        socket.emit(event, payload, (res) => {
+            if (res) setError(res);
+        });
     };
 
-    const leaveRoom = (roomId) => {
-        socket.emit("room:leave", { roomId }, (res) => res && setError(res));
+    return {
+        joinRoom: (roomId) => emitWithError("room:join", { roomId }),
+        leaveRoom: (roomId) => emitWithError("room:leave", { roomId }),
+        deleteRoom: (roomId) => emitWithError("room:delete", { roomId }),
+        startRoom: (roomId) => emitWithError("room:start", { roomId }),
+        createRoom: () => socket.emit("room:create", (res) => res && setError(res))
     };
-
-    const deleteRoom = (roomId) => {
-        socket.emit("room:delete", { roomId }, (res) => res && setError(res));
-    };
-
-    const createRoom = () => {
-        socket.emit("room:create", (res) => res && setError(res));
-    };
-
-    return { joinRoom, leaveRoom, deleteRoom, createRoom };
 }

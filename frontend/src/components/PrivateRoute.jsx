@@ -12,10 +12,7 @@ function ProtectedRoute() {
             const token = localStorage.getItem("token");
             const currentGame = localStorage.getItem("currentGame");
             if (!token || !isTokenValid(token)) setRedirectPath("/logout");
-            else {
-                if (!currentGame) setRedirectPath(null);
-                else await handlePlayerRoom(currentGame, "/rooms", (path) => setRedirectPath(path));
-            }
+            else if (currentGame) await handlePlayerRoom(currentGame, "/rooms", (path) => setRedirectPath(path));
 
             setLoading(false);
         };
